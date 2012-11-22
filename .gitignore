@@ -1,1 +1,9 @@
 /document.xml
+/\[Content_Types\].xml
+/_rels
+/word
+/media
+*~
+/document.docx
+target/
+.ensime*
