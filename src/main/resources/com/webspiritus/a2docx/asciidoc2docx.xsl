@@ -514,7 +514,7 @@
     </w:p>
   </xsl:template>
 
-  <xsl:template match="/article/section/section/title">
+  <xsl:template match="/article/section/section/title | /article/appendix/section/title">
     <xsl:param name="section-id"></xsl:param>
     <w:p>
       <w:pPr>
@@ -526,7 +526,7 @@
     </w:p>
   </xsl:template>
 
-  <xsl:template match="/article/section/section/section/title">
+  <xsl:template match="/article/section/section/section/title | /article/appendix/section/section/title">
     <xsl:param name="section-id"></xsl:param>
     <w:p>
       <w:pPr>
@@ -538,7 +538,7 @@
     </w:p>
   </xsl:template>
 
-  <xsl:template match="/article/section/section/section/section/title">
+  <xsl:template match="/article/section/section/section/section/title | /article/appendix/section/section/section/title">
     <xsl:param name="section-id"></xsl:param>
     <w:p>
       <w:pPr>
@@ -745,7 +745,7 @@
 	    </xsl:if>
 	  </w:tcPr>
 	  <w:p>
-	    <xsl:apply-templates select="*|node()">
+	    <xsl:apply-templates select="node()">
 	      <xsl:with-param name="bold" select="1"></xsl:with-param>
 	    </xsl:apply-templates>
 	  </w:p>
@@ -862,13 +862,35 @@
     </w:p>
   </xsl:template>
 
+  <xsl:template match="literal">
+    <xsl:apply-templates select="node()">
+      <xsl:with-param name="monospace" select="1"></xsl:with-param>
+    </xsl:apply-templates>
+  </xsl:template>
+
+  <xsl:template match="ulink">
+    <!-- TODO: @url -->
+    <xsl:apply-templates select="node()"></xsl:apply-templates>
+  </xsl:template>
+
+  <xsl:template match="link">
+    <!-- TODO: @linkend -->
+    <xsl:apply-templates select="node()"></xsl:apply-templates>
+  </xsl:template>
+
+  <xsl:template match="note">
+    <!-- TODO -->
+  </xsl:template>
+
   <xsl:template match="text()" priority="0.75">
     <xsl:param name="bold"></xsl:param>
     <xsl:param name="space-preserve" select="0"></xsl:param>
+    <xsl:param name="monospace"></xsl:param>
     <w:r>
-      <xsl:if test="$bold">
+      <xsl:if test="$bold or $monospace">
 	<w:rPr>
-	  <w:b />
+	  <xsl:if test="$bold"><w:b /></xsl:if>
+	  <xsl:if test="$monospace"><w:rFonts w:ascii="Courier" w:eastAsia="Courier" /></xsl:if>
 	</w:rPr>
       </xsl:if>
       <xsl:choose>
