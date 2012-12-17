@@ -5,6 +5,7 @@ import sbt.Extracted
 import sbt.Project
 import sbt.RichFile
 import sbt.State
+import sbt.Path.richFile
 
 object Command {
   val name = "a2docx"
@@ -19,8 +20,8 @@ object Command {
       info("Generating...")
 
       val extracted: Extracted = Project.extract(state)
-      val target = new RichFile(extracted.get(sbt.Keys.target)) / name
-      val source = new RichFile(extracted.get(sbt.Keys.sourceDirectory)) / "asciidoc"
+      val target = extracted.get(sbt.Keys.target) / name
+      val source = extracted.get(sbt.Keys.sourceDirectory) / "asciidoc"
       info("name = " + extracted.get(sbt.Keys.name))
       info("target = " + target.toString())
       info("sourceDirectory = " + source.toString)
