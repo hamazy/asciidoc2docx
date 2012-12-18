@@ -37,7 +37,12 @@ object Generator {
   }
 }
 
-class Generator(sourceFile: AsciiDocFile, targetDirectory: File)(implicit logger: Logger) {
+class Generator(sourceFile: AsciiDocFile, targetParentDirectry: File)(implicit logger: Logger) {
+  private val targetDirectory: File = {
+    val targetDirectory = targetParentDirectry / sourceFile.file.base
+    if (!targetDirectory.exists) targetDirectory.mkdir
+    targetDirectory
+  }
   import scala.actors.Actor._
   def generate(implicit logger: Logger): Unit = {
 
@@ -166,7 +171,7 @@ class DocxFile(val baseDirectory: File, val base: String) {
   val footer1 = wordDirectory / "footer1.xml"
   val documentRelationships = wordRelsDirectory / "document.xml.rels"
   def writeZipFile() = {
-    val zipStream = new ZipOutputStream(new FileOutputStream(new File(baseDirectory, base + ".docx")))
+    val zipStream = new ZipOutputStream(new FileOutputStream(new File(baseDirectory.getParent(), base + ".docx")))
     val entries = List(document, contentTypes, relationships, styles,
 		       numbering, header1, footer1, documentRelationships) ++ mediaDirectory.listFiles()
     def addEntryToZipStream(entry: File) = entry.relativeTo(baseDirectory) map { relative =>
