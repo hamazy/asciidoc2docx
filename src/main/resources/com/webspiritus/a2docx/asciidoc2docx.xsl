@@ -104,6 +104,21 @@
 	  <xsl:attribute name="Id"><xsl:value-of select="generate-id(.)"></xsl:value-of></xsl:attribute>
 	</xsl:element>
       </xsl:for-each>
+      <xsl:call-template name="icon-rel">
+	<xsl:with-param name="type">caution</xsl:with-param>
+      </xsl:call-template>
+      <xsl:call-template name="icon-rel">
+	<xsl:with-param name="type">important</xsl:with-param>
+      </xsl:call-template>
+      <xsl:call-template name="icon-rel">
+	<xsl:with-param name="type">note</xsl:with-param>
+      </xsl:call-template>
+      <xsl:call-template name="icon-rel">
+	<xsl:with-param name="type">tip</xsl:with-param>
+      </xsl:call-template>
+      <xsl:call-template name="icon-rel">
+	<xsl:with-param name="type">warning</xsl:with-param>
+      </xsl:call-template>
       <xsl:element name="rel:Relationship">
 	<xsl:attribute name="Type">http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering</xsl:attribute>
 	<xsl:attribute name="Target">/word/numbering.xml</xsl:attribute>
@@ -119,6 +134,23 @@
 	<xsl:attribute name="Target">/word/footer1.xml</xsl:attribute>
 	<xsl:attribute name="Id"><xsl:value-of select="generate-id(document(concat($target-base, '/word/footer1.xml')))"></xsl:value-of></xsl:attribute>
       </xsl:element>
+      <xsl:for-each select="//ulink[@url]">
+	<xsl:element name="rel:Relationship">
+	  <xsl:attribute name="Type">http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink</xsl:attribute>
+	  <xsl:attribute name="Target"><xsl:value-of select="@url"></xsl:value-of></xsl:attribute>
+	  <xsl:attribute name="TargetMode">External</xsl:attribute>
+	  <xsl:attribute name="Id"><xsl:value-of select="generate-id(.)"></xsl:value-of></xsl:attribute>
+	</xsl:element>
+      </xsl:for-each>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template name="icon-rel">
+    <xsl:param name="type"></xsl:param>
+    <xsl:element name="rel:Relationship">
+      <xsl:attribute name="Type">http://schemas.openxmlformats.org/officeDocument/2006/relationships/image</xsl:attribute>
+      <xsl:attribute name="Target"><xsl:value-of select="concat('/media/', $type, '.png')"></xsl:value-of></xsl:attribute>
+      <xsl:attribute name="Id"><xsl:value-of select="concat('icon-', $type)"></xsl:value-of></xsl:attribute>
     </xsl:element>
   </xsl:template>
 
@@ -761,9 +793,9 @@
     <xsl:variable name="file-name"
 		  select="mediaobject/imageobject/imagedata/@fileref"></xsl:variable>
     <xsl:variable name="width"
-		  select="mediaobject/imageobject/imagedata/@contentwidth * $emu"></xsl:variable>
+		  select="mediaobject/imageobject/imagedata/@contentwidth"></xsl:variable>
     <xsl:variable name="height"
-		  select="mediaobject/imageobject/imagedata/@contentdepth * $emu"></xsl:variable>
+		  select="mediaobject/imageobject/imagedata/@contentdepth"></xsl:variable>
     <xsl:if test="$width &lt;= 0 or $height &lt;= 0">
       <xsl:message terminate="yes">
 	<xsl:text>width or height for </xsl:text>
@@ -777,10 +809,29 @@
 		  select="concat('/media/', $file-name)"></xsl:variable>
     <xsl:variable name="relationship-id"
 		  select="document(concat($target-base, '/word/_rels/document.xml.rels'))/rel:Relationships/rel:Relationship[@Target=$relationship-target]/@Id"></xsl:variable>
-    <w:p><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">
+    <w:p><w:r>
+      <xsl:call-template name="figure">
+	<xsl:with-param name="width" select="$width"></xsl:with-param>
+	<xsl:with-param name="height" select="$height"></xsl:with-param>
+	<xsl:with-param name="description" select="$description"></xsl:with-param>
+	<xsl:with-param name="file-name" select="$file-name"></xsl:with-param>
+	<xsl:with-param name="relationship-id" select="$relationship-id"></xsl:with-param>
+      </xsl:call-template>
+    </w:r></w:p>
+  </xsl:template>
+
+  <xsl:template name="figure">
+    <xsl:param name="width"></xsl:param>
+    <xsl:param name="height"></xsl:param>
+    <xsl:param name="description"></xsl:param>
+    <xsl:param name="file-name"></xsl:param>
+    <xsl:param name="relationship-id"></xsl:param>
+    <xsl:variable name="width-in-emu" select="$width * $emu"></xsl:variable>
+    <xsl:variable name="height-in-emu" select="$height * $emu"></xsl:variable>
+    <w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">
       <wp:extent>
-	<xsl:attribute name="cx"><xsl:value-of select="$width"></xsl:value-of></xsl:attribute>
-	<xsl:attribute name="cy"><xsl:value-of select="$height"></xsl:value-of></xsl:attribute>
+	<xsl:attribute name="cx"><xsl:value-of select="$width-in-emu"></xsl:value-of></xsl:attribute>
+	<xsl:attribute name="cy"><xsl:value-of select="$height-in-emu"></xsl:value-of></xsl:attribute>
       </wp:extent>
       <wp:effectExtent l="0" t="0" r="0" b="0" />
       <wp:docPr>
@@ -825,8 +876,8 @@
 	      <a:xfrm>
 		<a:off x="0" y="0" />
 		<a:ext>
-		  <xsl:attribute name="cx"><xsl:value-of select="$width"></xsl:value-of></xsl:attribute>
-		  <xsl:attribute name="cy"><xsl:value-of select="$height"></xsl:value-of></xsl:attribute>
+		  <xsl:attribute name="cx"><xsl:value-of select="$width-in-emu"></xsl:value-of></xsl:attribute>
+		  <xsl:attribute name="cy"><xsl:value-of select="$height-in-emu"></xsl:value-of></xsl:attribute>
 		</a:ext>
 	      </a:xfrm>
 	      <a:prstGeom prst="rect">
@@ -836,7 +887,97 @@
 	  </pic:pic>
 	</a:graphicData>
       </a:graphic>
-    </wp:inline></w:drawing></w:r></w:p>
+    </wp:inline></w:drawing>
+  </xsl:template>
+
+  <xsl:template name="icon-figure">
+    <xsl:param name="width"></xsl:param>
+    <xsl:param name="height"></xsl:param>
+    <xsl:param name="description"></xsl:param>
+    <xsl:param name="file-name"></xsl:param>
+    <xsl:param name="relationship-id"></xsl:param>
+    <xsl:variable name="width-in-emu" select="$width * $emu"></xsl:variable>
+    <xsl:variable name="height-in-emu" select="$height * $emu"></xsl:variable>
+    <w:drawing>
+      <xsl:element name="wp:anchor">
+	<xsl:attribute name="distT">0</xsl:attribute>
+	<xsl:attribute name="distB">0</xsl:attribute>
+	<xsl:attribute name="distL">114300</xsl:attribute>
+	<xsl:attribute name="distR">114300</xsl:attribute>
+	<xsl:attribute name="simplePos">0</xsl:attribute>
+	<xsl:attribute name="relativeHeight">251658240</xsl:attribute>
+	<xsl:attribute name="behindDoc">0</xsl:attribute>
+	<xsl:attribute name="locked">0</xsl:attribute>
+	<xsl:attribute name="layoutInCell">1</xsl:attribute>
+	<xsl:attribute name="allowOverlap">1</xsl:attribute>
+	<wp:simplePos x="0" y="0"/>
+	<wp:positionH relativeFrom="column">
+	  <wp:posOffset>0</wp:posOffset>
+	</wp:positionH>
+	<wp:positionV relativeFrom="paragraph">
+	  <wp:posOffset>179705</wp:posOffset>
+	</wp:positionV>
+	<wp:extent>
+	  <xsl:attribute name="cx"><xsl:value-of select="$width-in-emu"></xsl:value-of></xsl:attribute>
+	  <xsl:attribute name="cy"><xsl:value-of select="$height-in-emu"></xsl:value-of></xsl:attribute>
+	</wp:extent>
+	<wp:effectExtent l="0" t="0" r="0" b="0" />
+	<wp:wrapSquare wrapText="bothSides"/>
+	<wp:docPr>
+	  <xsl:attribute name="id">
+	    <xsl:value-of select="count(preceding::informalfigure)"></xsl:value-of>
+	  </xsl:attribute>
+	  <xsl:attribute name="name">
+	    <xsl:value-of select="$description"></xsl:value-of>
+	  </xsl:attribute>
+	</wp:docPr>
+	<wp:cNvGraphicFramePr>
+	  <a:graphicFrameLocks noChangeAspect="1" />
+	</wp:cNvGraphicFramePr>
+	<a:graphic>
+	  <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+	    <pic:pic>
+	      <pic:nvPicPr>
+		<pic:cNvPr>
+		  <xsl:attribute name="name"><xsl:value-of select="$file-name"></xsl:value-of></xsl:attribute>
+		  <xsl:attribute name="id">
+		    <xsl:value-of select="count(preceding::informalfigure)"></xsl:value-of>
+		  </xsl:attribute>
+		</pic:cNvPr>
+		<pic:cNvPicPr />
+	      </pic:nvPicPr>
+	      <pic:blipFill>
+		<a:blip cstate="print">
+		  <xsl:attribute name="r:embed">
+		    <xsl:value-of select="$relationship-id"></xsl:value-of>
+		  </xsl:attribute>
+		  <a:extLst>
+		    <a:ext>
+		      <xsl:attribute name="uri">{28A0092B-C50C-407E-A947-70E740481C1C}</xsl:attribute>
+		    </a:ext>
+		  </a:extLst>
+		</a:blip>
+		<a:stretch>
+		  <a:fillRect />
+		</a:stretch>
+	      </pic:blipFill>
+	      <pic:spPr>
+		<a:xfrm>
+		  <a:off x="0" y="0" />
+		  <a:ext>
+		    <xsl:attribute name="cx"><xsl:value-of select="$width-in-emu"></xsl:value-of></xsl:attribute>
+		    <xsl:attribute name="cy"><xsl:value-of select="$height-in-emu"></xsl:value-of></xsl:attribute>
+		  </a:ext>
+		</a:xfrm>
+		<a:prstGeom prst="rect">
+		  <a:avLst />
+		</a:prstGeom>
+	      </pic:spPr>
+	    </pic:pic>
+	  </a:graphicData>
+	</a:graphic>
+      </xsl:element>
+    </w:drawing>
   </xsl:template>
 
   <xsl:template match="screen">
@@ -869,8 +1010,15 @@
   </xsl:template>
 
   <xsl:template match="ulink">
-    <!-- TODO: @url -->
-    <xsl:apply-templates select="node()"></xsl:apply-templates>
+    <xsl:variable name="url"><xsl:value-of select="@url"></xsl:value-of></xsl:variable>
+    <xsl:element name="w:hyperlink">
+      <xsl:attribute name="r:id">
+	<xsl:value-of select="document(concat($target-base, '/word/_rels/document.xml.rels'))/rel:Relationships/rel:Relationship[@Target=$url]/@Id"></xsl:value-of>
+      </xsl:attribute>
+      <xsl:apply-templates select="node()">
+	<xsl:with-param name="color">000080</xsl:with-param><!-- navy -->
+      </xsl:apply-templates>
+    </xsl:element>
   </xsl:template>
 
   <xsl:template match="link">
@@ -879,18 +1027,52 @@
   </xsl:template>
 
   <xsl:template match="note">
-    <!-- TODO -->
+    <xsl:call-template name="draw-separator"></xsl:call-template>
+    <xsl:apply-templates select="*"></xsl:apply-templates>
+    <xsl:call-template name="draw-separator"></xsl:call-template>
+  </xsl:template>
+
+  <xsl:template name="draw-separator">
+    <xsl:element name="w:p">
+      <xsl:element name="w:r">
+	<xsl:element name="w:separator"></xsl:element>
+      </xsl:element>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="note/title">
+    <xsl:element name="w:p">
+      <w:pPr>
+	<w:pStyle w:val="heading3" />
+      </w:pPr>
+      <w:r>
+	<xsl:call-template name="icon-figure">
+	  <xsl:with-param name="width">32</xsl:with-param>
+	  <xsl:with-param name="height">32</xsl:with-param>
+	  <xsl:with-param name="description">note-icon</xsl:with-param>
+	  <xsl:with-param name="file-name">note.png</xsl:with-param>
+	  <xsl:with-param name="relationship-id">icon-note</xsl:with-param>
+	</xsl:call-template>
+      </w:r>
+      <xsl:apply-templates select="node()"></xsl:apply-templates>
+    </xsl:element>
   </xsl:template>
 
   <xsl:template match="text()" priority="0.75">
     <xsl:param name="bold"></xsl:param>
     <xsl:param name="space-preserve" select="0"></xsl:param>
     <xsl:param name="monospace"></xsl:param>
+    <xsl:param name="color"></xsl:param>
     <w:r>
-      <xsl:if test="$bold or $monospace">
+      <xsl:if test="$bold or $monospace or $color">
 	<w:rPr>
 	  <xsl:if test="$bold"><w:b /></xsl:if>
 	  <xsl:if test="$monospace"><w:rFonts w:ascii="Courier" w:eastAsia="Courier" /></xsl:if>
+	  <xsl:if test="$color">
+	    <xsl:element name="w:color">
+	      <xsl:attribute name="w:val"><xsl:value-of select="$color"></xsl:value-of></xsl:attribute>
+	    </xsl:element>
+	  </xsl:if>
 	</w:rPr>
       </xsl:if>
       <xsl:choose>
