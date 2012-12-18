@@ -61,6 +61,8 @@ class Generator(sourceFile: AsciiDocFile, targetParentDirectry: File)(implicit l
     val images = listImages(sourceFile, docbookFile, docxFile)
     images.foreach(f => FileUtils.copyFileToDirectory(f, docxFile.mediaDirectory.raw))
 
+    writeIcons(docxFile)
+
     docxFile.writeZipFile()
   }
   /* foo.asciidoc => foo.xml in DocBook format */
@@ -109,6 +111,12 @@ class Generator(sourceFile: AsciiDocFile, targetParentDirectry: File)(implicit l
     transformer.transform(docbookFile, new StreamResult(buffer), "list-images", targetFile.mediaDirectory.raw)
     val xmlDoc = XML.loadString(buffer.toString)
     (xmlDoc \ "image").toList map (_.text) map (new File(sourceFile.file.asFile.getParentFile, _))
+  }
+
+  private def writeIcons(targetFile: DocxFile) = {
+    List("caution.png", "important.png", "note.png", "tip.png", "warning.png") map { filename =>
+      (getClass.getResourceAsStream(filename), new File(targetFile.mediaDirectory.raw, filename))
+    } foreach { e=> FileUtils.copyInputStreamToFile(e._1, e._2) }
   }
 }
 
