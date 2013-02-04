@@ -706,7 +706,8 @@
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="informaltable">
+  <xsl:template match="informaltable | table">
+    <xsl:apply-templates select="title"></xsl:apply-templates>
     <w:tbl>
       <w:tblPr>
 	<w:tblW w:w="5000" w:type="pct"/>
@@ -1038,6 +1039,16 @@
 	<xsl:element name="w:separator"></xsl:element>
       </xsl:element>
     </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="table/title">
+    <w:p>
+      <w:pPr>
+	<w:pStyle w:val="heading3" />
+      </w:pPr>
+      <w:r><w:t>表<xsl:value-of select="count(preceding::table) + 1"></xsl:value-of>: </w:t></w:r>
+      <xsl:apply-templates select="node()"></xsl:apply-templates>
+    </w:p>
   </xsl:template>
 
   <xsl:template match="note/title">
