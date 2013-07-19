@@ -17,7 +17,7 @@ object Command {
 
       val extracted: Extracted = Project.extract(state)
       val target = extracted.get(sbt.Keys.target) / name
-      val source = extracted.get(sbt.Keys.sourceDirectory) / "asciidoc"
+      val source = extracted.get(sbt.Keys.sourceDirectory) / "main/asciidoc"
       info("name = " + extracted.get(sbt.Keys.name))
       info("target = " + target.toString())
       info("sourceDirectory = " + source.toString)
