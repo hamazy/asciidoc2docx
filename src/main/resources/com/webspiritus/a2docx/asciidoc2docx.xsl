@@ -1004,6 +1004,10 @@
     </w:p>
   </xsl:template>
 
+  <xsl:template match="example">
+    <xsl:apply-templates select="*"></xsl:apply-templates>
+  </xsl:template>
+
   <xsl:template match="literal">
     <xsl:apply-templates select="node()">
       <xsl:with-param name="monospace" select="1"></xsl:with-param>
@@ -1033,6 +1037,12 @@
     <xsl:call-template name="draw-separator"></xsl:call-template>
   </xsl:template>
 
+  <xsl:template match="xref">
+    <!-- FIXME
+	 temporarily ignore an xref element
+    -->
+  </xsl:template>
+
   <xsl:template name="draw-separator">
     <xsl:element name="w:p">
       <xsl:element name="w:r">
@@ -1047,6 +1057,16 @@
 	<w:pStyle w:val="heading3" />
       </w:pPr>
       <w:r><w:t>表<xsl:value-of select="count(preceding::table) + 1"></xsl:value-of>: </w:t></w:r>
+      <xsl:apply-templates select="node()"></xsl:apply-templates>
+    </w:p>
+  </xsl:template>
+
+  <xsl:template match="example/title">
+    <w:p>
+      <w:pPr>
+	<w:pStyle w:val="heading3" />
+      </w:pPr>
+      <w:r><w:t>例<xsl:value-of select="count(preceding::example) + 1"></xsl:value-of>: </w:t></w:r>
       <xsl:apply-templates select="node()"></xsl:apply-templates>
     </w:p>
   </xsl:template>
