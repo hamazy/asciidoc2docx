@@ -1,7 +1,6 @@
 package com.webspiritus.a2docx
 
-import sbt.Keys
-import sbt.Project
+import sbt.{Keys, Project}
 
 object Plugin extends sbt.Plugin {
 

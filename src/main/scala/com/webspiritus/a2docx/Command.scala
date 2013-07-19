@@ -1,10 +1,6 @@
 package com.webspiritus.a2docx
 
-import sbt.CommandSupport
-import sbt.Extracted
-import sbt.Project
-import sbt.RichFile
-import sbt.State
+import sbt.{CommandSupport, Extracted, Project, RichFile, State}
 import sbt.Path.richFile
 
 object Command {
