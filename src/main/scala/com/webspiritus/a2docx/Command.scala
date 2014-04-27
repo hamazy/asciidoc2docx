@@ -1,34 +1,27 @@
 package com.webspiritus.a2docx
 
-import sbt.{CommandSupport, Extracted, Project, RichFile, State}
+import sbt.{ Extracted, Project, RichFile, State }
 import sbt.Path.richFile
 
 object Command {
   val name = "a2docx"
   val briefHelp =
     (name + " generate",
-     "Creates OpenXML Word documents from asciidoc documents.")
+      "Creates OpenXML Word documents from asciidoc documents.")
   val detail = ""
   val display = ""
   def a2docx = sbt.Command.args(name, briefHelp, detail, display) {
-    case (state, "generate"::rest) => {
-      implicit val s = state
-      info("Generating...")
-
+    case (state, "generate" :: _) => {
+      state.log.info("Generating...")
       val extracted: Extracted = Project.extract(state)
       val target = extracted.get(sbt.Keys.target) / name
       val source = extracted.get(sbt.Keys.sourceDirectory) / "main/asciidoc"
-      info("name = " + extracted.get(sbt.Keys.name))
-      info("target = " + target.toString())
-      info("sourceDirectory = " + source.toString)
-      Generator(source, target)(CommandSupport.logger(state))
+      state.log.debug("name = " + extracted.get(sbt.Keys.name))
+      state.log.debug("target = " + target.toString())
+      state.log.debug("sourceDirectory = " + source.toString)
+      Generator(source, target, state)
       state
     }
-    case (state, args)  => {
-      implicit val s = state
-      info(briefHelp._1)
-      state
-    }
+    case (state, args) => state
   }
-  private def info(message: String)(implicit state: State): Unit = CommandSupport.logger(state).info(message)
 }
